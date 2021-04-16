@@ -1,0 +1,346 @@
+---
+title: "CaseStudy 2 Jobin"
+author: "Jobin Joseph"
+date: "4/01/2021"
+output: html_document
+---
+
+
+## Loding in Data and Libraries 
+```{r initial}
+#Pull in the Libraries that will be used 
+library(tidyverse)
+library(ggthemes)
+library(naniar)
+library(ggplot2)
+library(maps)
+library(dplyr)
+library(mapproj)
+library(ggthemes)
+library(dplyr)
+library(tmap)
+library(tmaptools)
+library(ggrepel)
+library(class)
+library(caret)
+library(e1071)
+
+# Importing the  main data set 
+
+employeeorgin = read.csv("C:/Users/jjose/Desktop/SMU Data Science/Doing Data science/Final Project/CaseStudy2-data.csv", header = TRUE)
+employeeorgin
+employeecleaned = read.csv("C:/Users/jjose/Desktop/SMU Data Science/Doing Data science/Final Project/CaseStudy2-data.csv", header = TRUE)
+# seeing if there are any missing values 
+gg_miss_var(employeeorgin)
+
+#importing  In attrition data set 
+Attritiontestingset = read.csv("C:/Users/jjose/Desktop/SMU Data Science/Doing Data science/Final Project/CaseStudy2CompSet No Attrition.csv", header = TRUE)
+# seeing if there are any missing values 
+gg_miss_var(Attritiontestingset)
+
+#importing  In Salary  data set 
+salarytestingset = read.csv("C:/Users/jjose/Desktop/SMU Data Science/Doing Data science/Final Project/CaseStudy2CompSet No Salary.csv", header = TRUE)
+# seeing if there are any missing values 
+gg_miss_var(salarytestingset)
+
+
+```
+
+## General information gained by Exploring the DATA
+```{r }
+
+
+summary(employeecleaned)
+
+employeecleaned$JobInvolvement <- as.factor(employeecleaned$JobInvolvement)
+employeecleaned$JobLevel <- as.factor(employeecleaned$JobLevel)
+employeecleaned$JobSatisfaction <- as.factor(employeecleaned$JobSatisfaction)
+employeecleaned$PerformanceRating <- as.factor(employeecleaned$PerformanceRating)
+employeecleaned$RelationshipSatisfaction <- as.factor(employeecleaned$RelationshipSatisfaction)
+employeecleaned$StockOptionLevel <- as.factor(employeecleaned$StockOptionLevel)
+employeecleaned$TrainingTimesLastYear <- as.factor(employeecleaned$TrainingTimesLastYear)
+employeecleaned$WorkLifeBalance <- as.factor(employeecleaned$WorkLifeBalance)
+employeecleaned$Education <- as.factor(employeecleaned$Education)
+employeecleaned$Department <- as.factor(employeecleaned$Department)
+employeecleaned$EducationField <- as.factor(employeecleaned$EducationField)
+employeecleaned$OverTime <- as.factor(employeecleaned$OverTime)
+employeecleaned$MaritalStatus <- as.factor(employeecleaned$MaritalStatus)
+employeecleaned$Gender <- as.factor(employeecleaned$Gender)
+
+str(employeecleaned) 
+
+summary(Attritiontestingset)
+
+Attritiontestingset$JobInvolvement <- as.factor(Attritiontestingset$JobInvolvement)
+Attritiontestingset$JobLevel <- as.factor(Attritiontestingset$JobLevel)
+Attritiontestingset$JobSatisfaction <- as.factor(Attritiontestingset$JobSatisfaction)
+Attritiontestingset$PerformanceRating <- as.factor(Attritiontestingset$PerformanceRating)
+Attritiontestingset$RelationshipSatisfaction <- as.factor(Attritiontestingset$RelationshipSatisfaction)
+Attritiontestingset$StockOptionLevel <- as.factor(Attritiontestingset$StockOptionLevel)
+Attritiontestingset$TrainingTimesLastYear <- as.factor(Attritiontestingset$TrainingTimesLastYear)
+Attritiontestingset$WorkLifeBalance <- as.factor(Attritiontestingset$WorkLifeBalance)
+Attritiontestingset$Education <- as.factor(Attritiontestingset$Education)
+Attritiontestingset$Department <- as.factor(Attritiontestingset$Department)
+Attritiontestingset$EducationField <- as.factor(Attritiontestingset$EducationField)
+Attritiontestingset$OverTime <- as.factor(Attritiontestingset$OverTime)
+Attritiontestingset$MaritalStatus <- as.factor(Attritiontestingset$MaritalStatus)
+Attritiontestingset$Gender <- as.factor(Attritiontestingset$Gender)
+
+str(Attritiontestingset) 
+
+summary(salarytestingset)
+
+salarytestingset$JobInvolvement <- as.factor(salarytestingset$JobInvolvement)
+salarytestingset$JobLevel <- as.factor(salarytestingset$JobLevel)
+salarytestingset$JobSatisfaction <- as.factor(salarytestingset$JobSatisfaction)
+salarytestingset$PerformanceRating <- as.factor(salarytestingset$PerformanceRating)
+salarytestingset$RelationshipSatisfaction <- as.factor(salarytestingset$RelationshipSatisfaction)
+salarytestingset$StockOptionLevel <- as.factor(salarytestingset$StockOptionLevel)
+salarytestingset$TrainingTimesLastYear <- as.factor(salarytestingset$TrainingTimesLastYear)
+salarytestingset$WorkLifeBalance <- as.factor(salarytestingset$WorkLifeBalance)
+salarytestingset$Education <- as.factor(salarytestingset$Education)
+salarytestingset$Department <- as.factor(salarytestingset$Department)
+salarytestingset$EducationField <- as.factor(salarytestingset$EducationField)
+salarytestingset$OverTime <- as.factor(salarytestingset$OverTime)
+salarytestingset$MaritalStatus <- as.factor(salarytestingset$MaritalStatus)
+salarytestingset$Gender <- as.factor(salarytestingset$Gender)
+
+str(salarytestingset) 
+
+#we need to remove over 18 since there is only factor 
+employeecleaned$Over18 <- NULL
+Attritiontestingset$Over18 <- NULL
+salarytestingset$Over18 <- NULL
+
+# filter employees that stayed in the company and make new data set 
+noattrition = employeecleaned%>% filter(Attrition == "No")
+noattrition$JobSatisfaction = as.factor(noattrition$JobSatisfaction)
+str(noattrition)
+
+# filter employees that left  the company and make new data set 
+yesattrition = employeecleaned %>% filter(Attrition == "Yes")
+yesattrition$JobSatisfaction = as.factor(yesattrition$JobSatisfaction)
+str(yesattrition)
+
+
+#
+
+# what  Job role had the most Job Satisfaction ?
+
+library(ggplot2)
+
+
+
+ggplot(employeeorgin) +
+ aes(x = JobRole, y = JobSatisfaction, fill = JobRole) +
+ geom_boxplot() +
+ labs(x = "Job Roles", y = "Job Satisfaction Levels ", title = "Job Satisfaction Ratings ") +
+ theme_minimal()
+
+#any relationship between variables
+
+
+ggplot(employeeorgin) +
+ aes(x = Attrition, y = YearsAtCompany) +
+ geom_boxplot(fill = "#0c4c8a") +
+ labs(title = "Years at the company vs Attrition") +
+ theme_minimal()
+
+# comparing Monthly income by Years at the company
+# we  can see generally the more years at the company  the more th employee gets paid  but this varies more  after 25 years at working in the company
+ggplot(employeeorgin) +
+ aes(x = YearsAtCompany, y = MonthlyIncome) +
+ geom_point(size = 1L, colour = "#0c4c8a") +
+ geom_smooth(span = 0.75) +
+ labs(title = "Monthly Income vs Years at the company") +
+ theme_minimal()
+
+
+# comparing Hourly rate by gender and Jobrole
+# we  can see at each respective job role women tend to get have a lower hourly rate 
+ggplot(employeeorgin) +
+ aes(x = JobRole, y = HourlyRate, fill = Gender) +
+ geom_boxplot() +
+ scale_fill_hue() + labs(title = "Diffrences in Hourly Rate by Gender and Job Role") +
+ theme_minimal()
+
+
+# comparing Overtime Selection by Atrrition groups
+# We can can see that people that do less Overtime tend to stay with the company longer 
+
+ggplot(employeecleaned) +
+ aes(x = OverTime, fill = OverTime) +
+ geom_bar() +
+ scale_fill_hue() +
+ labs(title = "Overtime Selection by Attrition Groups", subtitle = "Left = No Attrition, Right = Yes Attrition") +
+ theme_minimal() +
+ facet_wrap(vars(Attrition))
+
+
+```
+
+
+## Knn Classifier
+
+
+
+```{R knn}
+
+#using Age, JobRole and Satisfaction  
+# has sens 0.8513284  speci 0.5917255
+library(e1071)
+
+
+AccHolder = numeric(100)
+SensHolder = numeric(100)
+SpecHolder = numeric(100)
+
+for (seed in 1:100)
+{
+set.seed(seed)
+employeetrainIndices = sample(seq(1:length(employeecleaned$Age)),round(.7*length(employeecleaned$Age)))
+trainemployee = employeecleaned[employeetrainIndices,]
+testemployee = employeecleaned[-employeetrainIndices,]
+
+model = naiveBayes(trainemployee[,c("Age","JobRole","JobSatisfaction")],factor(trainemployee$Attrition,labels = c("No", "Yes")))
+
+
+CM = confusionMatrix(table(factor(testemployee$Attrition, labels = c("No", "Yes")),predict(model,testemployee[,c("Age","JobRole","JobSatisfaction")])))
+
+AccHolder[seed] = CM$overall[1]
+SensHolder[seed] = CM$byClass[1]
+SpecHolder[seed] = CM$byClass[2]
+}
+
+mean(AccHolder)
+#Standard Error of the Mean
+sd(AccHolder)/sqrt(100) 
+mean(SensHolder)
+#Standard Error of the Mean
+sd(SensHolder)/sqrt(100) 
+mean(SpecHolder)
+#Standard Error of the Mean
+sd(SensHolder)/sqrt(100)
+
+
+## JobRole JobSatisfaction Age OverTime
+# has sens  0.8600353  speci 0.665503
+library(e1071)
+
+AccHolder = numeric(100)
+SensHolder = numeric(100)
+SpecHolder = numeric(100)
+
+for (seed in 1:100)
+{
+set.seed(seed)
+employeetrainIndices = sample(seq(1:length(employeecleaned$Age)),round(.7*length(employeecleaned$Age)))
+trainemployee = employeecleaned[employeetrainIndices,]
+testemployee = employeecleaned[-employeetrainIndices,]
+
+model = naiveBayes(trainemployee[,c("JobRole","JobSatisfaction","Age", "OverTime")],factor(trainemployee$Attrition,labels = c("No", "Yes")))
+
+
+CM = confusionMatrix(table(factor(testemployee$Attrition, labels = c("No", "Yes")),predict(model,testemployee[,c("JobRole","JobSatisfaction","Age", "OverTime")])))
+
+AccHolder[seed] = CM$overall[1]
+SensHolder[seed] = CM$byClass[1]
+SpecHolder[seed] = CM$byClass[2]
+}
+
+mean(AccHolder)
+#Standard Error of the Mean
+sd(AccHolder)/sqrt(100) 
+mean(SensHolder)
+#Standard Error of the Mean
+sd(SensHolder)/sqrt(100) 
+mean(SpecHolder)
+#Standard Error of the Mean
+sd(SensHolder)/sqrt(100)
+
+
+
+
+
+## Age JobRole Jobsatisfaction OverTime and gender  
+# has sens0.8583898  speci 0.6322005
+library(e1071)
+
+AccHolder = numeric(100)
+SensHolder = numeric(100)
+SpecHolder = numeric(100)
+
+
+
+for (seed in 1:100)
+{
+set.seed(seed)
+employeetrainIndices = sample(seq(1:length(employeecleaned$Age)),round(.7*length(employeecleaned$Age)))
+trainemployee = employeecleaned[employeetrainIndices,]
+testemployee = employeecleaned[-employeetrainIndices,]
+
+model = naiveBayes(trainemployee[,c("JobRole","Age","JobSatisfaction", "OverTime","Gender")],factor(trainemployee$Attrition,labels = c("No", "Yes")))
+
+
+CM = confusionMatrix(table(factor(testemployee$Attrition, labels = c("No", "Yes")),predict(model,testemployee[,c("Age","JobRole","JobSatisfaction", "OverTime","Gender")])))
+
+AccHolder[seed] = CM$overall[1]
+SensHolder[seed] = CM$byClass[1]
+SpecHolder[seed] = CM$byClass[2]
+}
+
+mean(AccHolder)
+#Standard Error of the Mean
+sd(AccHolder)/sqrt(100) 
+mean(SensHolder)
+#Standard Error of the Mean
+sd(SensHolder)/sqrt(100) 
+mean(SpecHolder)
+#Standard Error of the Mean
+sd(SensHolder)/sqrt(100)
+
+
+
+
+ # Will use the second naive bayes model  with Age JobRole Jobsatisfaction and OverTime to predict for testing set since it has the highest mean of sense adn specificty 
+
+model = naiveBayes(employeecleaned[,c("Age","JobRole","JobSatisfaction","OverTime")],factor(employeecleaned$Attrition, labels = c("No", "Yes")))
+
+Attritiontestingset$Attrition = predict(model,Attritiontestingset[,c("Age","JobRole","JobSatisfaction","OverTime")])
+attrition_output <- Attritiontestingset %>% select(ID,Attrition)
+write.csv(attrition_output, file ="Case2PredictionsJobinJoseph Attrition.csv", row.names = FALSE)
+
+```
+
+## Making a linear regression model to help to predict that the  new values 
+
+You can also embed plots, for example:
+
+```{r linear}
+
+
+library(olsrr)
+
+#This package helps to  find the best explanatory variables
+
+testbestfit = lm(MonthlyIncome ~ ., data = employeecleaned)
+summary(testbestfit)
+ols_step_all_possible(testbestfit,prem = 0.05, details = TRUE)
+
+#This is the best  model that I could find RSME of 980.9
+#uses this model to predict the  set that was given us
+bestfitmodel = lm(MonthlyIncome ~factor(BusinessTravel) +factor(JobLevel)+factor(JobRole)+ TotalWorkingYears+YearsSinceLastPromotion +PerformanceRating+TotalWorkingYears*factor(JobLevel)+ TotalWorkingYears*factor(JobRole)+ TotalWorkingYears*factor(BusinessTravel), data = employeecleaned)
+
+summary(bestfitmodel)
+
+predictionofSalary = predict(bestfitmodel, newdata = salarytestingset)
+
+outputofpred = tibble("ID" = salarytestingset$ID, "Salary" = predictionofSalary)
+
+write.csv(outputofpred, "Case2PredictionsJobinJoseph Salary.csv",row.names = FALSE )
+
+
+
+```
+
+
