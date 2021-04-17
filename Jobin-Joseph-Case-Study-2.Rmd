@@ -25,7 +25,11 @@ library(class)
 library(caret)
 library(e1071)
 
+# DDAnlaytics is commissioned to help Frito Lay to look at employee data
+
 # Importing the  main data set 
+
+
 
 employeeorgin = read.csv("C:/Users/jjose/Desktop/SMU Data Science/Doing Data science/Final Project/CaseStudy2-data.csv", header = TRUE)
 employeeorgin
@@ -339,6 +343,7 @@ outputofpred = tibble("ID" = salarytestingset$ID, "Salary" = predictionofSalary)
 
 write.csv(outputofpred, "Case2PredictionsJobinJoseph Salary.csv",row.names = FALSE )
 
+# In conclusion it would be helpful to use these models to help predict the employees probability of attrition and Monthly Salarys 
 
 
 ```
