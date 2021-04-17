@@ -420,7 +420,11 @@ library(caret)</code></pre>
 ##     lift</code></pre>
 <pre class="r"><code>library(e1071)
 
+# DDAnlaytics is commissioned to help Frito Lay to look at employee data
+
 # Importing the  main data set 
+
+
 
 employeeorgin = read.csv(&quot;C:/Users/jjose/Desktop/SMU Data Science/Doing Data science/Final Project/CaseStudy2-data.csv&quot;, header = TRUE)
 employeeorgin</code></pre>
@@ -8136,7 +8140,7 @@ summary(testbestfit)</code></pre>
 ## Residual standard error: 1008 on 802 degrees of freedom
 ## Multiple R-squared:  0.9556, Adjusted R-squared:  0.9519 
 ## F-statistic: 257.6 on 67 and 802 DF,  p-value: &lt; 2.2e-16</code></pre>
-<pre class="r"><code> # ols_step_all_possible(testbestfit,prem = 0.05, details = TRUE)
+<pre class="r"><code>#ols_step_all_possible(testbestfit,prem = 0.05, details = TRUE)
 
 #This is the best  model that I could find RSME of 980.9
 #uses this model to predict the  set that was given us
@@ -8232,7 +8236,9 @@ summary(bestfitmodel)</code></pre>
 
 outputofpred = tibble(&quot;ID&quot; = salarytestingset$ID, &quot;Salary&quot; = predictionofSalary)
 
-write.csv(outputofpred, &quot;Case2PredictionsJobinJoseph Salary.csv&quot;,row.names = FALSE )</code></pre>
+write.csv(outputofpred, &quot;Case2PredictionsJobinJoseph Salary.csv&quot;,row.names = FALSE )
+
+# In conclusion it would be helpful to use these models to help predict the employees probability of attrition and Monthly Salarys </code></pre>
 </div>
 
 
